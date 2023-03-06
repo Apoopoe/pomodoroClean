@@ -40,7 +40,11 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.quitting = true
 			return m, tea.Quit
 		case key.Matches(msg, m.keymap.reset):
-			m.timer.Timeout = m.userWorkDuration
+			if !m.onBreak {
+				m.timer.Timeout = m.userWorkDuration
+			} else {
+				m.timer.Timeout = m.userBreakDuration
+			}
 		case key.Matches(msg, m.keymap.start, m.keymap.stop):
 			return m, m.timer.Toggle()
 		}
