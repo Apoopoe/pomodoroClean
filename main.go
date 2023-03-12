@@ -55,6 +55,10 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	if m.currentPeriod > m.userPeriods {
 		m.quitting = true
+		err := beeep.Notify("Pom", "You have finished your work session!", "asserts/information.png")
+		if err != nil {
+			fmt.Println("Something went wrong, a notification was not issued...")
+		}
 		return m, tea.Quit
 	}
 	if _, ok := msg.(timer.TimeoutMsg); ok {
