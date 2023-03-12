@@ -20,6 +20,8 @@ type model struct {
 	quitting          bool
 	userWorkDuration  time.Duration
 	userBreakDuration time.Duration
+	userPeriods       int
+	currentPeriod     int
 }
 
 type keymap struct {
@@ -50,6 +52,10 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 	}
 
+	if m.currentPeriod > m.userPeriods {
+		m.quitting = true
+		return m, tea.Quit
+	}
 	if _, ok := msg.(timer.TimeoutMsg); ok {
 		if !m.onBreak {
 			m.onBreak = true
@@ -60,6 +66,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.onBreak = false
 			m.timer.Timeout = m.userWorkDuration
 			m.timer.Start()
+			m.currentPeriod++
 			return m, nil
 		}
 	}
@@ -138,6 +145,8 @@ func workView(m model) string {
 	s := m.timer.View()
 	s += "\n"
 	s = "Relaxing in " + s
+	s += "\n"
+	s += fmt.Sprintf("%d/%d", m.currentPeriod, m.userPeriods)
 	s += m.helpView()
 	return s
 }
@@ -146,21 +155,36 @@ func breakView(m model) string {
 	s := m.timer.View()
 	s += "\n"
 	s = "Working in " + s
+	s += "\n"
+	s += fmt.Sprintf("%d/%d", m.currentPeriod, m.userPeriods)
 	s += m.helpView()
 	return s
 }
 
 func main() {
+	if len(os.Args) < 4 {
+		fmt.Printf("Please enter - 1: work duration, 2: break duration, 3: number of work+break blocks to do.\n")
+		os.Exit(1)
+	}
 	inputWorkDuration, err := strconv.Atoi(os.Args[1])
 	if err != nil {
 		// TODO add a better error message with example usage
 		fmt.Printf("Timout not set correctly, needs to be an int\n")
 		os.Exit(1)
 	}
+
 	inputBreakDuration, err := strconv.Atoi(os.Args[2])
 	if err != nil {
 		// TODO add a better error message with example usage
 		fmt.Printf("Break duration not set correctly, needs to be an int\n")
+		os.Exit(1)
+	}
+
+	// TODO this does not catch if user does not input anything (error with os.Args not strconv!)
+	inputPeriod, err := strconv.Atoi(os.Args[3])
+	if err != nil {
+		// TODO add a better error message with example usage
+		fmt.Printf("Work periods not set correctly, please input an int")
 		os.Exit(1)
 	}
 
@@ -188,6 +212,8 @@ func main() {
 		},
 		userWorkDuration:  workDuration,
 		userBreakDuration: breakDuration,
+		userPeriods:       inputPeriod,
+		currentPeriod:     0,
 		help:              help.NewModel(),
 	}
 	m.keymap.start.SetEnabled(false)
