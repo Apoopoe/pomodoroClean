@@ -10,6 +10,7 @@ import (
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/timer"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/gen2brain/beeep"
 )
 
 type model struct {
@@ -59,11 +60,19 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	if _, ok := msg.(timer.TimeoutMsg); ok {
 		if !m.onBreak {
 			m.onBreak = true
+			err := beeep.Notify("Pom", "You are on break!", "asserts/information.png")
+			if err != nil {
+				fmt.Println("Something went wrong, a notification was not issued...")
+			}
 			m.timer.Timeout = m.userBreakDuration
 			m.timer.Start()
 			return m, nil
 		} else {
 			m.onBreak = false
+			err := beeep.Notify("Pom", "Start working...", "asserts/information.png")
+			if err != nil {
+				fmt.Println("Something went wrong, a notification was not issued...")
+			}
 			m.timer.Timeout = m.userWorkDuration
 			m.timer.Start()
 			m.currentPeriod++
