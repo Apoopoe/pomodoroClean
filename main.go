@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+  "errors"
 	"os"
 	"strconv"
 	"time"
@@ -174,11 +175,26 @@ func breakView(m model) string {
 	return s
 }
 
+func setWorkConfig(input os.Args) (int, int, int error) {
+  if len(input) == 0 {
+    return 25, 5, 4, nil
+  } else if len(input) > 4 {
+    return 0, 0, 0, errors.New("Too few inputs, please enter - 1: work duration, 2: break duration, 3: number of work+break blocks to do.\n")
+  }
+}
+
 func main() {
+  if len(os.Args) == 0 {
+    inputWorkDuration := 25
+    inputBreakDuration := 5
+    inputPeriod := 4
+  }
+
 	if len(os.Args) < 4 {
 		fmt.Printf("Please enter - 1: work duration, 2: break duration, 3: number of work+break blocks to do.\n")
 		os.Exit(1)
 	}
+
 	inputWorkDuration, err := strconv.Atoi(os.Args[1])
 	if err != nil {
 		// TODO add a better error message with example usage
@@ -187,6 +203,7 @@ func main() {
 	}
 
 	inputBreakDuration, err := strconv.Atoi(os.Args[2])
+
 	if err != nil {
 		// TODO add a better error message with example usage
 		fmt.Printf("Break duration not set correctly, needs to be an int\n")
@@ -211,8 +228,8 @@ func main() {
 				key.WithHelp("s", "start"),
 			),
 			stop: key.NewBinding(
-				key.WithKeys("s"),
-				key.WithHelp("s", "pause"),
+				key.WithKeys("p"),
+				key.WithHelp("p", "pause"),
 			),
 			reset: key.NewBinding(
 				key.WithKeys("r"),
