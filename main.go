@@ -175,52 +175,49 @@ func breakView(m model) string {
 	return s
 }
 
-func setWorkConfig(input os.Args) (int, int, int error) {
-  if len(input) == 0 {
-    return 25, 5, 4, nil
-  } else if len(input) > 4 {
-    return 0, 0, 0, errors.New("Too few inputs, please enter - 1: work duration, 2: break duration, 3: number of work+break blocks to do.\n")
+func setWorkConfig(input []string) (model, error) {
+  pomodoroModel := model{}
+  intWorkDuration, intBreakDuration, periods, err := extractValues(input)
+  if err != nil {
+    return pomodoroModel, err
   }
+
+	workDuration := time.Duration(intWorkDuration) * time.Second
+	breakDuration := time.Duration(intBreakDuration) * time.Second
+  pomodoroModel = createPomodoroModel(workDuration, breakDuration, periods)
+
+  return pomodoroModel, nil
 }
 
-func main() {
-  if len(os.Args) == 0 {
-    inputWorkDuration := 25
-    inputBreakDuration := 5
-    inputPeriod := 4
+func extractValues(input []string) (int, int, int, error) {
+  if len(input) == 1 {
+    return 25, 5, 4, nil
+  }
+  if len(input) != 4 {
+    return 0, 0, 0, errors.New("Incorrect input, please enter - 1: work duration, 2: break duration, 3: number of work+break blocks to do.\n")
   }
 
-	if len(os.Args) < 4 {
-		fmt.Printf("Please enter - 1: work duration, 2: break duration, 3: number of work+break blocks to do.\n")
-		os.Exit(1)
-	}
-
-	inputWorkDuration, err := strconv.Atoi(os.Args[1])
+	inputWorkDuration, err := strconv.Atoi(input[1])
 	if err != nil {
-		// TODO add a better error message with example usage
-		fmt.Printf("Timout not set correctly, needs to be an int\n")
-		os.Exit(1)
+    fmt.Println(err)
+    return 0, 0, 0, errors.New("Timout not set correctly, needs to be an int\n")
 	}
 
-	inputBreakDuration, err := strconv.Atoi(os.Args[2])
-
+	inputBreakDuration, err := strconv.Atoi(input[2])
 	if err != nil {
-		// TODO add a better error message with example usage
-		fmt.Printf("Break duration not set correctly, needs to be an int\n")
-		os.Exit(1)
+    return 0, 0, 0, errors.New("Break duration not set correctly, needs to be an int\n")
 	}
 
-	// TODO this does not catch if user does not input anything (error with os.Args not strconv!)
 	inputPeriod, err := strconv.Atoi(os.Args[3])
 	if err != nil {
-		// TODO add a better error message with example usage
-		fmt.Printf("Work periods not set correctly, please input an int")
-		os.Exit(1)
+    return 0, 0, 0, errors.New("Work periods not set correctly, please input an int")
 	}
 
-	workDuration := time.Duration(inputWorkDuration) * time.Second
-	breakDuration := time.Duration(inputBreakDuration) * time.Second
-	m := model{
+  return inputWorkDuration, inputBreakDuration, inputPeriod, nil
+}
+
+func createPomodoroModel(workDuration time.Duration, breakDuration time.Duration, periods int) model {
+	pomodoroModel := model{
 		timer: timer.NewWithInterval(workDuration, time.Millisecond),
 		keymap: keymap{
 			start: key.NewBinding(
@@ -242,13 +239,23 @@ func main() {
 		},
 		userWorkDuration:  workDuration,
 		userBreakDuration: breakDuration,
-		userPeriods:       inputPeriod,
+		userPeriods:       periods,
 		currentPeriod:     0,
 		help:              help.NewModel(),
 	}
-	m.keymap.start.SetEnabled(false)
+	pomodoroModel.keymap.start.SetEnabled(false)
 
-	if _, err := tea.NewProgram(m).Run(); err != nil {
+  return pomodoroModel
+}
+
+func main() {
+  pomodoroModel, err := setWorkConfig(os.Args)
+  if err != nil {
+    fmt.Println(err)
+    os.Exit(1)
+  }
+
+	if _, err := tea.NewProgram(pomodoroModel).Run(); err != nil {
 		fmt.Println("Uh oh, we encountered an error:", err)
 		os.Exit(1)
 	}

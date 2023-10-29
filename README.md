@@ -1,12 +1,12 @@
 # pomodoro clean
-Simple and good looking :) 
+Simple terminal based pomodoro timer with system notifications 
 
 ## TODO
-- [ ] Better input errors
+- [x] Better input errors
 - [x] Set total work sessions (4 blocks of work+break) with auto-done
 - [x] Notification to start work or break
-- [ ] Notification when finished whole study session 
+- [x] Notification when finished whole study session 
 - [ ] Option to continue - either with same setup or enter new deets
-- [ ] Only count a period complete if a work and a rest is complete (no skips)
+- [ ] Currently `1` period is two loops through, where it should end after the first loop 
 - [ ] Better looks 
-- [ ] Default values (25min work, 5min break)
+- [x] Default values (25min work, 5min break)
