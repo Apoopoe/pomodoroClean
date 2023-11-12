@@ -182,8 +182,8 @@ func setWorkConfig(input []string) (model, error) {
     return pomodoroModel, err
   }
 
-	workDuration := time.Duration(intWorkDuration) * time.Second
-	breakDuration := time.Duration(intBreakDuration) * time.Second
+	workDuration := time.Duration(intWorkDuration) * time.Minute
+	breakDuration := time.Duration(intBreakDuration) * time.Minute
   pomodoroModel = createPomodoroModel(workDuration, breakDuration, periods)
 
   return pomodoroModel, nil
@@ -218,7 +218,7 @@ func extractValues(input []string) (int, int, int, error) {
 
 func createPomodoroModel(workDuration time.Duration, breakDuration time.Duration, periods int) model {
 	pomodoroModel := model{
-		timer: timer.NewWithInterval(workDuration, time.Millisecond),
+		timer: timer.NewWithInterval(workDuration, time.Second),
 		keymap: keymap{
 			start: key.NewBinding(
 				key.WithKeys("s"),
