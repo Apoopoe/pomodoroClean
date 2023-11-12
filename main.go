@@ -160,7 +160,7 @@ func workView(m model) string {
 	s += "\n"
 	s = "Relaxing in " + s
 	s += "\n"
-	s += fmt.Sprintf("%d/%d", m.currentPeriod, m.userPeriods)
+	s += fmt.Sprintf("%d/%d", m.currentPeriod, m.userPeriods+1)
 	s += m.helpView()
 	return s
 }
@@ -170,7 +170,7 @@ func breakView(m model) string {
 	s += "\n"
 	s = "Working in " + s
 	s += "\n"
-	s += fmt.Sprintf("%d/%d", m.currentPeriod, m.userPeriods)
+	s += fmt.Sprintf("%d/%d", m.currentPeriod, m.userPeriods+1)
 	s += m.helpView()
 	return s
 }
@@ -239,7 +239,7 @@ func createPomodoroModel(workDuration time.Duration, breakDuration time.Duration
 		},
 		userWorkDuration:  workDuration,
 		userBreakDuration: breakDuration,
-		userPeriods:       periods,
+		userPeriods:       periods-1,
 		currentPeriod:     0,
 		help:              help.NewModel(),
 	}
